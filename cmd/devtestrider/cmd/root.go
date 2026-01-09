@@ -62,15 +62,13 @@ var rootCmd = &cobra.Command{
 			Padding(0, 1)
 
 		infoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("86"))
-		passStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("42"))
-		failStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("160"))
 
 		fmt.Println(titleStyle.Render("DevTestrider Started"))
 		fmt.Println(infoStyle.Render("Watching for file changes..."))
 		fmt.Printf("Server running at http://localhost:%d\n", cfg.Server.Port)
 
 		// Start Orchestrator
-		orch := orchestrator.New(cfg, runner, watcher, srv, infoStyle, passStyle, failStyle)
+		orch := orchestrator.New(cfg, runner, watcher, srv)
 		quit := make(chan os.Signal, 1)
 		orchestratorDone := make(chan bool)
 
