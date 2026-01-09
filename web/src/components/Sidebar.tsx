@@ -17,8 +17,10 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col">
       <div className="p-6">
-        <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg mb-2" />
-        <span className="font-bold text-lg tracking-tight">DevTestrider</span>
+        <div className="flex items-center gap-3 mb-2">
+          <img src="/logo.png" alt="Logo" className="h-10 w-10 rounded-lg shadow-lg shadow-indigo-500/20" />
+          <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">DevTestrider</span>
+        </div>
       </div>
       
       <nav className="flex-1 px-4 space-y-1">
