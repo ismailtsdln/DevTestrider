@@ -53,17 +53,20 @@ func (w *Watcher) Start() {
 
 			// Handle file operations
 			if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Remove == fsnotify.Remove {
-				// Check if it's a Go file or relevant file
-				if !w.shouldIgnore(event.Name) && strings.HasSuffix(event.Name, ".go") {
 
-					// If a new directory is created, watch it
-					if event.Op&fsnotify.Create == fsnotify.Create {
-						fi, err := os.Stat(event.Name)
-						if err == nil && fi.IsDir() {
-							w.watcher.Add(event.Name)
+				// Handle new directory creation regardless of name (unless ignored)
+				if event.Op&fsnotify.Create == fsnotify.Create {
+					fi, err := os.Stat(event.Name)
+					if err == nil && fi.IsDir() && !w.shouldIgnore(event.Name) {
+						if err := w.watcher.Add(event.Name); err == nil {
+							log.Printf("Watching new directory: %s", event.Name)
 						}
+						// Don't return, as we might want to trigger a test run? Maybe not for just a dir create.
 					}
+				}
 
+				// Check if it's a Go file or relevant file for triggering tests
+				if !w.shouldIgnore(event.Name) && strings.HasSuffix(event.Name, ".go") {
 					// Debounce logic
 					if debounceTimer != nil {
 						debounceTimer.Stop()
