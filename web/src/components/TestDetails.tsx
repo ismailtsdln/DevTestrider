@@ -2,22 +2,40 @@ import { useEffect, useState } from 'react';
 import { ChevronRight, FileCode, CheckCircle2, XCircle, Clock, Percent } from 'lucide-react';
 import clsx from 'clsx';
 
-export function TestDetails() {
-  const [result, setResult] = useState<any>(null);
+interface TestCase {
+  name: string;
+  duration: number;
+  status: string;
+}
 
-  const fetchLatest = async () => {
-    try {
-      const res = await fetch('/api/results/latest');
-      if (res.ok) {
-        const data = await res.json();
-        setResult(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
+interface PackageResult {
+  name: string;
+  duration: number;
+  status: string;
+  tests: TestCase[];
+  coverage: number;
+}
+
+interface TestResult {
+  packages: Record<string, PackageResult>;
+}
+
+export function TestDetails() {
+  const [result, setResult] = useState<TestResult | null>(null);
 
   useEffect(() => {
+    const fetchLatest = async () => {
+      try {
+        const res = await fetch('/api/results/latest');
+        if (res.ok) {
+          const data = await res.json();
+          setResult(data);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
     fetchLatest();
     // Subscribe to SSE for updates
     const eventSource = new EventSource('/api/events');
@@ -28,7 +46,7 @@ export function TestDetails() {
   if (!result) return <div className="p-8 text-center text-slate-500">Loading test detail...</div>;
 
   // Convert packages map to array
-  const packages = Object.values(result.packages || {}).sort((a: any, b: any) => a.name.localeCompare(b.name));
+  const packages = Object.values(result.packages || {}).sort((a: PackageResult, b: PackageResult) => a.name.localeCompare(b.name));
 
   return (
     <div className="space-y-6">
@@ -39,7 +57,7 @@ export function TestDetails() {
         </div>
         
         <div className="divide-y divide-slate-800">
-            {packages.map((pkg: any, idx: number) => (
+            {packages.map((pkg: PackageResult, idx: number) => (
                 <div key={idx} className="p-4 hover:bg-slate-800/30 transition-colors flex items-center justify-between group cursor-pointer">
                     <div className="flex items-center gap-4">
                         {pkg.status === 'PASS' 

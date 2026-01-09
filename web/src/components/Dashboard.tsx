@@ -14,7 +14,15 @@ interface TestResult {
   success: boolean;
 }
 
-const StatCard = ({ title, value, sub, icon: Icon, color }: any) => (
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  sub: string;
+  icon: React.ElementType;
+  color: string;
+}
+
+const StatCard = ({ title, value, sub, icon: Icon, color }: StatCardProps) => (
   <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-xl backdrop-blur-sm">
     <div className="flex items-start justify-between">
       <div>
@@ -31,7 +39,7 @@ const StatCard = ({ title, value, sub, icon: Icon, color }: any) => (
 
 export function Dashboard() {
   const [data, setData] = useState<TestResult | null>(null);
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<{name: string, pass: number, fail: number}[]>([]);
 
   useEffect(() => {
      const fetchLatest = async () => {
