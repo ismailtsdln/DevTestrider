@@ -1,23 +1,45 @@
-import { ChevronRight, FileCode, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronRight, FileCode, CheckCircle2, XCircle, Clock, Percent } from 'lucide-react';
+import clsx from 'clsx';
 
 export function TestDetails() {
-  // Mock data for now
-  const packages = [
-    { name: 'github.com/ismailtsdln/DevTestrider/internal/engine', status: 'PASS', duration: 0.45, tests: 23 },
-    { name: 'github.com/ismailtsdln/DevTestrider/internal/server', status: 'PASS', duration: 0.12, tests: 8 },
-    { name: 'github.com/ismailtsdln/DevTestrider/cmd', status: 'FAIL', duration: 0.05, tests: 2 },
-  ];
+  const [result, setResult] = useState<any>(null);
+
+  const fetchLatest = async () => {
+    try {
+      const res = await fetch('http://localhost:8080/api/results/latest');
+      if (res.ok) {
+        const data = await res.json();
+        setResult(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchLatest();
+    // Subscribe to SSE for updates
+    const eventSource = new EventSource('http://localhost:8080/api/events');
+    eventSource.onmessage = () => fetchLatest();
+    return () => eventSource.close();
+  }, []);
+
+  if (!result) return <div className="p-8 text-center text-slate-500">Loading test detail...</div>;
+
+  // Convert packages map to array
+  const packages = Object.values(result.packages || {}).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
   return (
     <div className="space-y-6">
       <div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden backdrop-blur-sm">
         <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-slate-50">Test Packages</h3>
-            <div className="text-sm text-slate-400">Total: 3 packages</div>
+            <div className="text-sm text-slate-400">Total: {packages.length} packages</div>
         </div>
         
         <div className="divide-y divide-slate-800">
-            {packages.map((pkg, idx) => (
+            {packages.map((pkg: any, idx: number) => (
                 <div key={idx} className="p-4 hover:bg-slate-800/30 transition-colors flex items-center justify-between group cursor-pointer">
                     <div className="flex items-center gap-4">
                         {pkg.status === 'PASS' 
@@ -27,8 +49,16 @@ export function TestDetails() {
                         <div>
                             <p className="font-medium text-slate-200 group-hover:text-indigo-300 transition-colors font-mono text-sm">{pkg.name}</p>
                             <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                                <span className="flex items-center gap-1"><FileCode size={12}/> {pkg.tests} tests</span>
-                                <span className="flex items-center gap-1"><Clock size={12}/> {pkg.duration}s</span>
+                                <span className="flex items-center gap-1"><FileCode size={12}/> {pkg.tests?.length || 0} tests</span>
+                                <span className="flex items-center gap-1"><Clock size={12}/> {pkg.duration.toFixed(3)}s</span>
+                                {pkg.coverage > 0 && (
+                                    <span className={clsx("flex items-center gap-1 font-semibold", 
+                                        pkg.coverage > 80 ? "text-emerald-400" : 
+                                        pkg.coverage > 50 ? "text-amber-400" : "text-rose-400"
+                                    )}>
+                                        <Percent size={12}/> {pkg.coverage.toFixed(1)}%
+                                    </span>
+                                )}
                             </div>
                         </div>
                     </div>

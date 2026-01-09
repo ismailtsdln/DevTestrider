@@ -80,12 +80,40 @@ var rootCmd = &cobra.Command{
 					continue
 				}
 
+				// Header
 				status := failStyle.Render("FAILED ❌")
 				if result.Success {
 					status = passStyle.Render("PASSED ✅")
 				}
-
 				fmt.Printf("Status: %s (Duration: %.2fs)\n", status, result.Duration)
+
+				// Detailed Package Table
+				for _, pkg := range result.Packages {
+					pkgStatus := failStyle.Render("FAIL")
+					if pkg.Status == "PASS" {
+						pkgStatus = passStyle.Render("PASS")
+					}
+
+					// Coverage formatting
+					covStr := "N/A"
+					if pkg.Coverage > 0 {
+						covColor := "160" // Red
+						if pkg.Coverage > 50 {
+							covColor = "220"
+						} // Yellow
+						if pkg.Coverage > 80 {
+							covColor = "42"
+						} // Green
+						covStr = lipgloss.NewStyle().Foreground(lipgloss.Color(covColor)).Render(fmt.Sprintf("%.1f%%", pkg.Coverage))
+					}
+
+					fmt.Printf("  • %-40s %s  %s (%.2fs)\n",
+						pkg.Name,
+						pkgStatus,
+						covStr,
+						pkg.Duration,
+					)
+				}
 				srv.Broadcast(result)
 			}
 		}()

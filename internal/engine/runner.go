@@ -3,6 +3,7 @@ package engine
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -119,5 +120,19 @@ func (r *Runner) processEvent(result *TestResult, event GoTestEvent) {
 		// Only logic for attaching to specific tests is complex without tracking state.
 		// For simplicity, we won't attach granular output in this initial version
 		// unless we track the 'Run' action stack.
+		// Check for coverage output
+		// Format: "coverage: 45.2% of statements\n"
+		if strings.Contains(event.Output, "coverage:") && strings.Contains(event.Output, "% of statements") {
+			parts := strings.Fields(event.Output)
+			for _, part := range parts {
+				if strings.Contains(part, "%") {
+					valStr := strings.TrimSuffix(part, "%")
+					var coverage float64
+					fmt.Sscanf(valStr, "%f", &coverage)
+					pkg.Coverage = coverage
+					break
+				}
+			}
+		}
 	}
 }
