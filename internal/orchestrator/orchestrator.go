@@ -47,6 +47,14 @@ func (o *Orchestrator) Start(done chan bool) {
 				continue
 			}
 
+			// Run Analysis (go vet)
+			issues, err := engine.RunVet(filepath.Dir(eventPath))
+			if err == nil {
+				result.Issues = issues
+			} else {
+				log.Printf("Error running vet: %v", err)
+			}
+
 			// Render Status Header
 			status := failStyle.Render("FAILED ❌")
 			if result.Success {

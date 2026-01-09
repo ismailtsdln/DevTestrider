@@ -22,6 +22,7 @@ type TestResult struct {
 	Duration     float64                   `json:"duration"`
 	Packages     map[string]*PackageResult `json:"packages"`
 	Success      bool                      `json:"success"`
+	Issues       []string                  `json:"issues"`
 }
 
 type PackageResult struct {
