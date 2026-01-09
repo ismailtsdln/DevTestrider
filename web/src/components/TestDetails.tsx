@@ -7,7 +7,7 @@ export function TestDetails() {
 
   const fetchLatest = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/results/latest');
+      const res = await fetch('/api/results/latest');
       if (res.ok) {
         const data = await res.json();
         setResult(data);
@@ -20,7 +20,7 @@ export function TestDetails() {
   useEffect(() => {
     fetchLatest();
     // Subscribe to SSE for updates
-    const eventSource = new EventSource('http://localhost:8080/api/events');
+    const eventSource = new EventSource('/api/events');
     eventSource.onmessage = () => fetchLatest();
     return () => eventSource.close();
   }, []);

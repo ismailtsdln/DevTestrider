@@ -36,7 +36,7 @@ export function Dashboard() {
   useEffect(() => {
      const fetchLatest = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/results/latest');
+        const res = await fetch('/api/results/latest');
         if (res.ok) {
           const result = await res.json();
           if (result) {
@@ -54,7 +54,7 @@ export function Dashboard() {
     };
 
     // Setup SSE connection
-    const eventSource = new EventSource('http://localhost:8080/api/events');
+    const eventSource = new EventSource('/api/events');
     
     eventSource.onmessage = (event) => {
       console.log("Event:", event.data);
