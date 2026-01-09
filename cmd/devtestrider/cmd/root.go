@@ -11,6 +11,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ismailtsdln/DevTestrider/internal/config"
 	"github.com/ismailtsdln/DevTestrider/internal/engine"
+	"github.com/ismailtsdln/DevTestrider/internal/notify"
+	"github.com/ismailtsdln/DevTestrider/internal/report"
 	"github.com/ismailtsdln/DevTestrider/internal/server"
 	"github.com/spf13/cobra"
 )
@@ -114,6 +116,29 @@ var rootCmd = &cobra.Command{
 						pkg.Duration,
 					)
 				}
+				// Generate Reports
+				if len(cfg.Report.Formats) > 0 {
+					for _, fmtType := range cfg.Report.Formats {
+						var path string
+						var err error
+						switch fmtType {
+						case "html":
+							path, err = report.GenerateHTML(result, cfg.Report.OutputDir)
+						case "pdf":
+							path, err = report.GeneratePDF(result, cfg.Report.OutputDir)
+						}
+
+						if err != nil {
+							log.Printf("Failed to generate %s report: %v", fmtType, err)
+						} else if path != "" {
+							fmt.Printf("Report generated: %s\n", lipgloss.NewStyle().Foreground(lipgloss.Color("86")).Render(path))
+						}
+					}
+				}
+
+				// Send Notification
+				notify.SendNotification(cfg.Notifications, result)
+
 				srv.Broadcast(result)
 			}
 		}()
