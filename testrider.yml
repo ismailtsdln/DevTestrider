@@ -8,4 +8,4 @@ notifications:
   enable: true
   channels: ["browser", "desktop"] # options: browser, desktop, slack, email
 server:
-  port: 8080
+  port: 8085
