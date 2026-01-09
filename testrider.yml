@@ -1,0 +1,11 @@
+watch:
+  paths: ["./"]
+  ignore: ["node_modules", "vendor", ".git", "webview"]
+report:
+  formats: ["html", "json", "pdf"]
+  output_dir: "./reports"
+notifications:
+  enable: true
+  channels: ["browser", "desktop"] # options: browser, desktop, slack, email
+server:
+  port: 8080
